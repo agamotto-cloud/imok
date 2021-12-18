@@ -28,9 +28,12 @@ func Regist() {
 
 	v1 := eng.Group("/v1")
 
-	v1.Handle("GET", "/healz", service.Healz)
+	v1.Handle(http.MethodGet, "/healz", service.Healz)
 
-	v1.Handle("GET", "/regist", service.Regist)
+	v1.Handle(http.MethodGet, "/connect", service.Connect)
+
+	v1.Handle(http.MethodPost, "/sendMessage", service.SendMessage)
+
 }
 
 // Run 启动Http服务
