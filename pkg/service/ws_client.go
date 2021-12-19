@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"sync/atomic"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -13,6 +14,7 @@ type Client struct {
 	ClientID  string
 	wsConn    *websocket.Conn
 	closeFlag int32
+	pingTime  time.Time //心跳时间
 }
 
 func (m *Client) Close() error {
@@ -64,6 +66,20 @@ func (m *Client) Listen() {
 			}
 		}
 	}(m)
+}
+
+func (m *Client) HealthCheck() (isAlive bool) {
+	currentTime := time.Now()
+	log.Println("ping", m.ClientID)
+	if m.pingTime.IsZero() || currentTime.Sub(m.pingTime).Seconds() > 3 {
+		err := m.wsConn.PingHandler()
+		if err != nil {
+			log.Println("ping失败", m.ClientID)
+			return false
+		}
+	}
+	return true
+
 }
 
 /*func (m *Client) Write() {
